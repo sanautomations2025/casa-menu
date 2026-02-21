@@ -14,8 +14,10 @@ const supabase = createClient(
 
 const schema = z.object({
   name: z.string().optional(),
-  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter valid 10-digit mobile number'),
-  consent: z.literal(true),
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit mobile number'),
+  consent: z.literal(true, {
+    message: 'You must agree to receive offers',
+  }),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -146,10 +148,9 @@ export default function Home() {
     }
   }, []);
 
-  // Highlight active tab on scroll
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPos = window.scrollY + 100; // adjusted for smaller header
+      const scrollPos = window.scrollY + 100;
       let current = categories[0]?.id || '';
 
       categories.forEach((cat) => {
@@ -203,63 +204,65 @@ export default function Home() {
       <Toaster position="top-center" richColors />
 
       {!showMenu ? (
-        <div className="container min-vh-100 d-flex align-items-center justify-content-center py-5 bg-dark">
-          <div className="card shadow-lg p-5 bg-dark text-white border border-secondary rounded-4" style={{ maxWidth: '500px', width: '100%' }}>
-            <h1 className="text-center mb-4 fw-bold text-warning display-5">Casa Cafe</h1>
-            <p className="text-center text-secondary mb-5 fs-5">Scan • Browse • Get Exclusive Offers</p>
+        <div className="container min-vh-100 d-flex align-items-center justify-content-center py-5 bg-white">
+          <div className="card shadow-lg p-5 border border-purple-300 rounded-4 bg-white" style={{ maxWidth: '500px', width: '100%' }}>
+            <h1 className="text-center mb-4 fw-bold text-purple-700 display-5">Casa Cafe</h1>
+            <p className="text-center text-muted mb-5 fs-5">Enter your details to unlock exclusive offers</p>
 
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-4">
                 <input
-                  className="form-control form-control-lg bg-dark border-secondary text-white placeholder-secondary"
-                  placeholder="Your Name (optional)"
+                  className="form-control form-control-lg border-purple-300 text-dark placeholder-purple-500"
+                  placeholder="Enter your name (optional)"
                   {...register('name')}
                 />
               </div>
 
               <div className="mb-4">
                 <input
-                  className="form-control form-control-lg bg-dark border-secondary text-white placeholder-secondary"
-                  placeholder="Mobile Number *"
+                  className="form-control form-control-lg border-purple-300 text-dark placeholder-purple-500"
+                  placeholder="Enter your 10-digit mobile number *"
+                  inputMode="tel"
+                  pattern="[6789][0-9]{9}"
                   {...register('phone')}
                 />
                 {errors.phone && <small className="text-danger mt-2 d-block">{errors.phone.message}</small>}
               </div>
 
               <div className="form-check mb-4">
-                <input className="form-check-input bg-dark border-secondary" type="checkbox" id="consent" {...register('consent')} />
-                <label className="form-check-label text-secondary" htmlFor="consent">
+                <input className="form-check-input border-purple-300" type="checkbox" id="consent" {...register('consent')} />
+                <label className="form-check-label text-muted" htmlFor="consent">
                   I agree to receive promotions & updates via WhatsApp/SMS (Reply STOP to unsubscribe)
                 </label>
                 {errors.consent && <small className="text-danger mt-2 d-block">{errors.consent.message}</small>}
               </div>
 
-              <button type="submit" className="btn btn-warning btn-lg w-100 fw-bold rounded-pill" disabled={isSubmitting}>
-                {isSubmitting ? 'Please wait...' : 'View Menu & Offers'}
+              <button type="submit" className="btn btn-purple btn-lg w-100 fw-bold rounded-pill text-white" disabled={isSubmitting}>
+                {isSubmitting ? 'Please wait...' : 'View Menu & Offers →'}
               </button>
             </form>
 
-            <button className="btn btn-link text-secondary w-100 mt-4 fs-6" onClick={skip}>
+            <button className="btn btn-link text-purple-600 w-100 mt-4 fs-6" onClick={skip}>
               Skip → open menu anyway
             </button>
           </div>
         </div>
       ) : (
-        <div className="bg-dark min-vh-100 text-white pb-5">
+        <div className="bg-white min-vh-100 text-dark pb-5">
           <div className="container pt-4 pt-md-5">
-            <h1 className="text-center display-4 fw-bold mb-4 text-warning">Casa Cafe Menu</h1>
-            <p className="text-center text-secondary mb-5">Exclusively for Firenze</p>
+            <h1 className="text-center display-4 fw-bold mb-4 text-purple-700">Casa Cafe Menu</h1>
+            <p className="text-center text-muted mb-5">Exclusively for Firenze</p>
 
-            {/* Smaller & more elegant category bar */}
-            <div className="sticky-top bg-dark shadow mb-5" style={{ top: 0, zIndex: 1000 }}>
+            {/* Smaller category bar */}
+            <div className="sticky-top bg-white shadow-sm mb-5" style={{ top: 0, zIndex: 1000 }}>
               <div className="d-flex overflow-auto py-2 px-3 gap-2 scrollbar-hide">
                 {categories.map(cat => (
                   <button
                     key={cat.id}
-                    className={`btn rounded-pill px-4 py-2 fw-medium text-nowrap fs-6 transition-all shadow-sm ${
+                    className={`btn rounded-pill px-4 py-2 fw-medium text-nowrap fs-6 transition-all ${
                       activeCategory === cat.id
-                        ? 'btn-warning text-dark shadow-lg scale-105'
-                        : 'btn-outline-warning text-warning border border-warning border-opacity-50 hover:border-opacity-100 hover:shadow'
+                        ? 'btn-purple text-white shadow'
+                        : 'btn-outline-purple text-purple border-purple border-opacity-50 hover:border-opacity-100'
                     }`}
                     onClick={() => document.getElementById(cat.id)?.scrollIntoView({ behavior: 'smooth' })}
                   >
@@ -271,26 +274,26 @@ export default function Home() {
 
             {/* Category cards */}
             {categories.map(cat => (
-              <div className="card bg-dark border border-secondary-subtle mb-5 shadow-lg rounded-4 overflow-hidden" id={cat.id} key={cat.id}>
+              <div className="card shadow mb-5 rounded-4 overflow-hidden border border-purple-200" id={cat.id} key={cat.id}>
                 <img
                   src={cat.image}
                   className="card-img-top"
                   alt={cat.name}
-                  style={{ height: '200px', objectFit: 'cover' }}
+                  style={{ height: '220px', objectFit: 'cover' }}
                   loading="lazy"
                 />
                 <div className="card-body p-0">
-                  <div className="bg-dark text-warning fw-bold p-3 fs-4 border-bottom border-secondary">
+                  <div className="bg-purple-100 text-purple-800 fw-bold p-3 fs-4 border-bottom border-purple-200">
                     {cat.name}
                   </div>
                   <ul className="list-group list-group-flush">
                     {cat.items.map((item, i) => (
                       <li
                         key={i}
-                        className="list-group-item bg-dark text-white d-flex justify-content-between align-items-center py-3 px-4 border-bottom border-secondary fs-5"
+                        className="list-group-item d-flex justify-content-between align-items-center py-3 px-4 border-bottom border-purple-100 fs-5"
                       >
                         <span>{item.name}</span>
-                        <span className="fw-bold text-warning">₹{item.price}</span>
+                        <span className="fw-bold text-purple-700">₹{item.price}</span>
                       </li>
                     ))}
                   </ul>
